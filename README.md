@@ -26,19 +26,21 @@ Sistema de censo y conteo vehicular inteligente desarrollado en **Rosario, Argen
    cd Analitica_por_video_IA
 
 2. **Configurar el Backend (Python):**
+   ```bash
    python -m venv env_ia
    env_ia\Scripts\activate
    pip install -r requirements.txt
 
-3. **Configurar el Frontend (React):**
+4. **Configurar el Frontend (React):**
+   ```bash
    npm install
 
-###Cómo usar el sistema
+### Cómo usar el sistema
 
-Inicia el sistema ejecutando el archivo INICIAR_SISTEMA.bat.
-Espera a que la consola de Python confirme: ✅ Motor IA listo y caliente.
-La interfaz web se abrirá en http://localhost:3000.
-Carga tu video, selecciona la herramienta de dibujo y define tus puntos de conteo.
-Presiona INICIAR CENSO.
+- Inicia el sistema ejecutando el archivo INICIAR_SISTEMA.bat.
+- Espera a que la consola de Python confirme: ✅ Motor IA listo y caliente.
+- La interfaz web se abrirá en http://localhost:3000.
+- Carga tu video, selecciona la herramienta de dibujo y define tus puntos de conteo.
+- Presiona INICIAR CENSO.
 
 Desarrollado por Matias Vazquez
