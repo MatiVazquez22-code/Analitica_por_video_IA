@@ -43,4 +43,7 @@ Sistema de censo y conteo vehicular inteligente desarrollado en **Rosario, Argen
 - Carga tu video, selecciona la herramienta de dibujo y define tus puntos de conteo.
 - Presiona INICIAR CENSO.
 
+![preview](https://github.com/user-attachments/assets/c63c9b59-e998-4c56-96d1-0e7d015b031f)
+
+
 Desarrollado por Matias Vazquez
