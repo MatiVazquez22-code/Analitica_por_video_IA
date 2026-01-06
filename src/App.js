@@ -10,7 +10,6 @@ import autoTable from 'jspdf-autotable';
 const App = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [previewFrame, setPreviewFrame] = useState(null);
-  // Estado para capturar las dimensiones reales del video cargado
   const [videoDims, setVideoDims] = useState({ width: 1280, height: 720 });
   const [tool, setTool] = useState('Line'); 
   const [zones, setZones] = useState([]);
@@ -108,7 +107,6 @@ const App = () => {
     video.src = URL.createObjectURL(file);
     
     video.onloadedmetadata = () => {
-      // CAPTURAMOS LAS DIMENSIONES REALES (Evita el estiramiento)
       setVideoDims({ width: video.videoWidth, height: video.videoHeight });
       video.currentTime = 0.5;
     };
@@ -122,23 +120,49 @@ const App = () => {
     };
   };
 
+  // --- LÓGICA DE CLIC CON COMPENSACIÓN DE MÁRGENES NEGROS ---
   const handleCanvasClick = (e) => {
-    if (isAnalyzing) return;
-    const rect = canvasRef.current.getBoundingClientRect();
+    if (isAnalyzing || !canvasRef.current) return;
     
-    // El mapeo de clics ahora usa videoDims para ser exacto a cualquier resolución
-    const x = ((e.clientX - rect.left) / rect.width) * videoDims.width;
-    const y = ((e.clientY - rect.top) / rect.height) * videoDims.height;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
 
-    const newPoints = [...currentPoints, { x, y }];
-    setCurrentPoints(newPoints);
+    // Calculamos la proporción del video vs el contenedor visual
+    const videoRatio = videoDims.width / videoDims.height;
+    const containerRatio = rect.width / rect.height;
 
-    if (newPoints.length === (tool === 'Polygon' ? 4 : 2)) {
-      const name = window.prompt("Nombre de la zona/línea:", `Carril ${zones.length + 1}`);
-      if (name) {
-        setZones([...zones, { name, points: newPoints, type: tool, classes: [...selectedClasses] }]);
+    let actualWidth, actualHeight, offsetX, offsetY;
+
+    if (containerRatio > videoRatio) {
+      // Caso: Franjas negras a los costados
+      actualHeight = rect.height;
+      actualWidth = rect.height * videoRatio;
+      offsetX = (rect.width - actualWidth) / 2;
+      offsetY = 0;
+    } else {
+      // Caso: Franjas negras arriba y abajo
+      actualWidth = rect.width;
+      actualHeight = rect.width / videoRatio;
+      offsetX = 0;
+      offsetY = (rect.height - actualHeight) / 2;
+    }
+
+    // Restamos el offset (margen negro) y escalamos al tamaño real del video
+    const x = ((e.clientX - rect.left - offsetX) / actualWidth) * videoDims.width;
+    const y = ((e.clientY - rect.top - offsetY) / actualHeight) * videoDims.height;
+
+    // Solo guardamos si el clic cae dentro del área real del video
+    if (x >= 0 && x <= videoDims.width && y >= 0 && y <= videoDims.height) {
+      const newPoints = [...currentPoints, { x, y }];
+      setCurrentPoints(newPoints);
+
+      if (newPoints.length === (tool === 'Polygon' ? 4 : 2)) {
+        const name = window.prompt("Nombre de la zona/línea:", `Carril ${zones.length + 1}`);
+        if (name) {
+          setZones([...zones, { name, points: newPoints, type: tool, classes: [...selectedClasses] }]);
+        }
+        setCurrentPoints([]);
       }
-      setCurrentPoints([]);
     }
   };
 
@@ -150,11 +174,11 @@ const App = () => {
     img.src = previewFrame;
     img.onload = () => {
       ctx.clearRect(0, 0, videoDims.width, videoDims.height);
-      ctx.drawImage(img, 0, 0);
+      ctx.drawImage(img, 0, 0, videoDims.width, videoDims.height);
       
       zones.forEach(z => {
         ctx.strokeStyle = '#0ea5e9'; 
-        ctx.lineWidth = videoDims.width * 0.005; // Grosor proporcional al ancho
+        ctx.lineWidth = videoDims.width * 0.005; 
         ctx.beginPath();
         ctx.moveTo(z.points[0].x, z.points[0].y);
         z.points.forEach(p => ctx.lineTo(p.x, p.y));
@@ -178,7 +202,7 @@ const App = () => {
 
       if (currentPoints.length > 0) {
         ctx.strokeStyle = '#f43f5e'; 
-        ctx.lineWidth = 4; 
+        ctx.lineWidth = videoDims.width * 0.004; 
         ctx.beginPath();
         ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
         currentPoints.forEach(p => ctx.lineTo(p.x, p.y)); 
@@ -248,8 +272,7 @@ const App = () => {
       </div>
 
       <div className="flex-1 flex items-center justify-center bg-[#020617] p-8">
-        <div className="relative border-4 border-slate-800 rounded-2xl overflow-hidden bg-black shadow-2xl flex items-center justify-center" 
-             style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }}>
+        <div className="relative border-4 border-slate-800 rounded-2xl overflow-hidden bg-black shadow-2xl flex items-center justify-center w-full h-full max-w-full max-h-full">
           {isAnalyzing ? (
             <img 
               src={previewFrame} 
@@ -265,7 +288,7 @@ const App = () => {
               className="w-full h-full object-contain cursor-crosshair block" 
             />
           )}
-          <div className="absolute bottom-4 right-6 text-white/20 font-black tracking-tighter text-2xl select-none pointer-events-none">
+          <div className="absolute bottom-4 right-6 text-white/20 font-black tracking-tighter text-2xl select-none pointer-events-none uppercase">
             ANALÍTICA POR VIDEO
           </div>
         </div>
