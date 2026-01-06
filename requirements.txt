@@ -1,0 +1,11 @@
+ultralytics
+fastapi
+uvicorn
+python-multipart
+opencv-python
+numpy
+torch
+torchvision
+torchaudio
+tensorrt
+jsonschema
