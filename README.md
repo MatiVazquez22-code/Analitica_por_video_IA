@@ -1,4 +1,4 @@
-# Analítica Vial IA 🚦🤖
+# Analítica Vial IA 🤖
 
 Sistema de censo y conteo vehicular inteligente desarrollado en **Rosario, Argentina**. Este proyecto utiliza **YOLOv8** optimizado mediante **NVIDIA TensorRT** para ofrecer un procesamiento de imágenes de alta velocidad, permitiendo auditorías de tráfico eficientes sobre archivos de video.
 
